@@ -2,43 +2,48 @@
 
 import os;
 from Utils import get_drives;
+from Utils import get_parent_path;
 import tkinter as tk;
 from tkinter import ttk;
+from pathlib import Path
 
-from ctypes import windll
+for item in os.listdir("D:"):
+    print(item)
 
-#ttk.Progressbar;
+def set_current_dir(dir):
+    currentDirLabel.config(text = dir)
+    print(dir)
+    items = os.listdir(os.path.join(dir))
+    counter = 1
+    currentDirContentListbox.delete(0,currentDirContentListbox.size()-1)
+    currentDirContentListbox.insert(++counter, "..")
+    print(dir)
+    for item in items:
+        currentDirContentListbox.insert(++counter, os.path.join(dir, item))
 
-def a(x):
-    print ("hi")
-
-def CurSelet(event):
+def item_selected(event):
     widget = event.widget
     selection=widget.curselection()
     value = widget.get(selection[0])
-    values = ''
-    counter = 1
-    currentDirContentListbox.delete(0,currentDirContentListbox.size()-1)
     if (value == '..'):
-        if (currentDirLabel['text'].rfind('\\') != -1):
-            value = currentDirLabel['text'][0:currentDirLabel['text'].rfind('\\')]
-            print(value)
-            values = os.listdir(value)
-            currentDirContentListbox.insert(++counter, "..")
-            currentDirLabel.config(text = value)
-            for item in values:
-                currentDirContentListbox.insert(++counter, value + "\\" + item)
+        if (currentDirLabel['text']==get_parent_path(currentDirLabel['text'])):
+            reset()
         else:
-            values = get_drives()
-            for item in values:
-                currentDirContentListbox.insert(++counter, item+":")
+            set_current_dir(get_parent_path(currentDirLabel['text']))
     else:
-        print(value)
-        values = os.listdir(value)
-        currentDirContentListbox.insert(++counter, "..")
-        currentDirLabel.config(text = value)
-        for item in values:
-            currentDirContentListbox.insert(++counter, value + "\\" + item)
+        if (os.path.isfile(value)):
+            print(is_file);
+        else:
+            set_current_dir(value)
+
+def reset():
+    currentDirLabel.config(text = '')
+    currentDirContentListbox.delete(0,currentDirContentListbox.size()-1)
+    counter = 1
+    for drive in drives:
+        currentDirContentListbox.insert(++counter, drive+":\\")
+
+
 
 window = tk.Tk()
 
@@ -54,13 +59,15 @@ copiesDirContentListbox.grid(row=1, column=1, sticky="n", padx=10)
 progress = ttk.Progressbar(window)
 progress.grid(row=2, columnspan=2)
 
-currentDirContentListbox.bind('<<ListboxSelect>>',CurSelet)
+#currentDirContentListbox.bind('<<ListboxSelect>>',CurSelet)
+currentDirContentListbox.bind('<<ListboxSelect>>',item_selected)
+
 
 drives = get_drives()
 counter = 1
 #currentDirContentListbox.insert(++counter, '..')
 for drive in drives:
-    currentDirContentListbox.insert(++counter, drive+":")
+    currentDirContentListbox.insert(++counter, drive+":\\")
 
 window.config(width = 640, height = 480)
 window.mainloop()
