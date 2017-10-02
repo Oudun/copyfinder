@@ -6,7 +6,7 @@ from os import walk
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
-cursor.execute("create table if not exists ph (nm varchar, ph varchar)")
+cursor.execute("create table if not exists files_tbl (path_col varchar, hash_col varchar)")
 
 
 #connection = gadfly.gadfly()
@@ -26,13 +26,13 @@ def md5(fname):
 fullPath = ''
 fullPathEscaped = ''
 counter=0
-for (dirpath, dirnames, filenames) in walk("D:\\MinecraftSaves"):
+for (dirpath, dirnames, filenames) in walk("D:\\PYTHON_PROJECTS\\copyfinder\\test"):
     for file in (filenames):
         fullPath = dirpath+"\\"+file
         fullPathEscaped = dirpath.replace('\'','').replace('\"','\\\"').replace('`','')+"\\" + file.replace('\'','').replace('\"','\\\"').replace('`','')
         try:
             print (md5(fullPath)+" "+fullPath)
-            cursor.execute("insert into ph(nm, ph) values ('" + fullPathEscaped+ "', '" + md5(dirpath+"\\"+file) + "')")
+            cursor.execute("insert into files_tbl(path_col, hash_col) values ('" + fullPathEscaped+ "', '" + md5(dirpath+"\\"+file) + "')")
         except IOError:
             print ("IOError to process " + fullPath)
         counter +=1
@@ -40,7 +40,7 @@ for (dirpath, dirnames, filenames) in walk("D:\\MinecraftSaves"):
             connection.commit()
             print ('records stored: '+ str(counter))
 
-cursor.execute("select * from ph")
+cursor.execute("select * from files_tbl")
 for x in cursor.fetchall():
   print (x)
 # prints ('arw', '3367')

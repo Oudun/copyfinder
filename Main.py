@@ -2,13 +2,14 @@
 
 import os;
 from Utils import get_drives;
-from Utils import get_parent_path;
-import tkinter as tk;
+from Utils import get_parent_path
+from Statistic import get_duplicates
 from tkinter import ttk;
-from pathlib import Path
+import tkinter as tk;
 
-for item in os.listdir("D:"):
-    print(item)
+
+def show_duplicates(value):
+    get_duplicates(value)
 
 def set_current_dir(dir):
     currentDirLabel.config(text = dir)
@@ -21,6 +22,7 @@ def set_current_dir(dir):
     for item in items:
         currentDirContentListbox.insert(++counter, os.path.join(dir, item))
 
+
 def item_selected(event):
     widget = event.widget
     selection=widget.curselection()
@@ -32,7 +34,8 @@ def item_selected(event):
             set_current_dir(get_parent_path(currentDirLabel['text']))
     else:
         if (os.path.isfile(value)):
-            print(is_file);
+            print(value)
+            show_duplicates(value)
         else:
             set_current_dir(value)
 
