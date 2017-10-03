@@ -26,18 +26,17 @@ def set_current_dir(dir):
 def item_selected(event):
     widget = event.widget
     selection=widget.curselection()
-    value = widget.get(selection[0])
-    if (value == '..'):
+    path = widget.get(selection[0])
+    if (path == '..'):
         if (currentDirLabel['text']==get_parent_path(currentDirLabel['text'])):
             reset()
         else:
             set_current_dir(get_parent_path(currentDirLabel['text']))
     else:
-        if (os.path.isfile(value)):
-            print(value)
-            show_duplicates(value)
+        if (os.path.isfile(path)):
+            show_duplicates(get_duplicates(path))
         else:
-            set_current_dir(value)
+            set_current_dir(path)
 
 def reset():
     currentDirLabel.config(text = '')
@@ -46,7 +45,11 @@ def reset():
     for drive in drives:
         currentDirContentListbox.insert(++counter, drive+":\\")
 
-
+def show_duplicates(values):
+   copiesDirContentListbox.delete(0,copiesDirContentListbox.size()-1)
+   counter = 1
+   for item in values:
+       copiesDirContentListbox.insert(++counter, item)
 
 window = tk.Tk()
 

@@ -6,7 +6,7 @@ from os import walk
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
-cursor.execute("create table if not exists files_tbl (path_col varchar, hash_col varchar)")
+cursor.execute("create table if not exists files_tbl (path_col varchar unique, hash_col varchar)")
 
 
 #connection = gadfly.gadfly()
@@ -26,7 +26,7 @@ def md5(fname):
 fullPath = ''
 fullPathEscaped = ''
 counter=0
-for (dirpath, dirnames, filenames) in walk("D:\\PYTHON_PROJECTS\\copyfinder\\test"):
+for (dirpath, dirnames, filenames) in walk("D:\\"):
     for file in (filenames):
         fullPath = dirpath+"\\"+file
         fullPathEscaped = dirpath.replace('\'','').replace('\"','\\\"').replace('`','')+"\\" + file.replace('\'','').replace('\"','\\\"').replace('`','')
