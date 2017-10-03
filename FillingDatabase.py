@@ -6,7 +6,7 @@ from os import walk
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
-cursor.execute("create table if not exists files_tbl (path_col varchar, hash_col varchar)")
+cursor.execute("create table if not exists files_tbl (path_col varchar unique, hash_col varchar)")
 
 
 #connection = gadfly.gadfly()

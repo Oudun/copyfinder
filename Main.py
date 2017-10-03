@@ -1,15 +1,16 @@
 #!/usr/bin/python
 
-import os;
-from Utils import get_drives;
+import os
+from Utils import get_drives
 from Utils import get_parent_path
 from Statistic import get_duplicates
-from tkinter import ttk;
-import tkinter as tk;
+from tkinter import ttk
+import tkinter as tk
 
 
 def show_duplicates(value):
     get_duplicates(value)
+
 
 def set_current_dir(dir):
     currentDirLabel.config(text = dir)
@@ -27,17 +28,18 @@ def item_selected(event):
     widget = event.widget
     selection=widget.curselection()
     value = widget.get(selection[0])
-    if (value == '..'):
-        if (currentDirLabel['text']==get_parent_path(currentDirLabel['text'])):
+    if value == '..':
+        if currentDirLabel['text'] == get_parent_path(currentDirLabel['text']):
             reset()
         else:
             set_current_dir(get_parent_path(currentDirLabel['text']))
     else:
-        if (os.path.isfile(value)):
+        if os.path.isfile(value):
             print(value)
             show_duplicates(value)
         else:
             set_current_dir(value)
+
 
 def reset():
     currentDirLabel.config(text = '')
@@ -45,7 +47,6 @@ def reset():
     counter = 1
     for drive in drives:
         currentDirContentListbox.insert(++counter, drive+":\\")
-
 
 
 window = tk.Tk()
@@ -62,13 +63,13 @@ copiesDirContentListbox.grid(row=1, column=1, sticky="n", padx=10)
 progress = ttk.Progressbar(window)
 progress.grid(row=2, columnspan=2)
 
-#currentDirContentListbox.bind('<<ListboxSelect>>',CurSelet)
-currentDirContentListbox.bind('<<ListboxSelect>>',item_selected)
+# currentDirContentListbox.bind('<<ListboxSelect>>',CurSelet)
+currentDirContentListbox.bind('<<ListboxSelect>>', item_selected)
 
 
 drives = get_drives()
 counter = 1
-#currentDirContentListbox.insert(++counter, '..')
+# currentDirContentListbox.insert(++counter, '..')
 for drive in drives:
     currentDirContentListbox.insert(++counter, drive+":\\")
 
