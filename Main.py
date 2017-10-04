@@ -4,8 +4,17 @@ import os
 from Utils import get_drives
 from Utils import get_parent_path
 from Statistic import get_duplicates
+from Statistic import is_scanning
+from Statistic import scan
 from tkinter import ttk
 import tkinter as tk
+
+
+def start_scanning():
+    if is_scanning:
+        print('Already scanning')
+    else:
+        scan()
 
 
 def show_duplicates(value):
@@ -51,21 +60,25 @@ def reset():
 
 window = tk.Tk()
 
+scanButton = tk.Button(window)
+scanButton['text'] = 'Scan'
+scanButton.grid(row=0, column=0, sticky='W')
+
 currentDirLabel = tk.Label(window)
-currentDirLabel.grid(row=0, columnspan=2)
+currentDirLabel.grid(row=1, columnspan=2)
 
 currentDirContentListbox = tk.Listbox(window, width=64, height=24)
-currentDirContentListbox.grid(row=1, column=0, sticky="n", padx=10)
+currentDirContentListbox.grid(row=2, column=0, sticky="n", padx=10)
 
 copiesDirContentListbox = tk.Listbox(window, width=64, height=24)
-copiesDirContentListbox.grid(row=1, column=1, sticky="n", padx=10)
+copiesDirContentListbox.grid(row=2, column=1, sticky="n", padx=10)
 
 progress = ttk.Progressbar(window)
-progress.grid(row=2, columnspan=2)
+progress.grid(row=3, columnspan=3)
 
-# currentDirContentListbox.bind('<<ListboxSelect>>',CurSelet)
+currentDirContentListbox.bind('<<Button-1>>', start_scanning)
+
 currentDirContentListbox.bind('<<ListboxSelect>>', item_selected)
-
 
 drives = get_drives()
 counter = 1

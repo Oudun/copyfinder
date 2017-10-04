@@ -1,8 +1,14 @@
 import sqlite3
-
+import time
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
+is_scanning_now = False
+
+
+def is_scanning():
+    global is_scanning_now
+    return is_scanning_now
 
 
 def get_duplicates(path):
@@ -43,3 +49,11 @@ def get_duplicates(path):
 cursor.execute("select * from files_tbl")
 for y in cursor.fetchall():
     print(y)
+
+
+def scan():
+    global is_scanning_now
+    is_scanning_now = True
+    time.sleep(10000)
+    is_scanning_now = False
+
