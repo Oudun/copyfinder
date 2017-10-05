@@ -1,59 +1,88 @@
 import sqlite3
 import time
+from os import walk
+import hashlib
+import os
+import threading
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
-is_scanning_now = False
+cursor.execute("drop table if exists files_tbl")
+cursor.execute("create table if not exists files_tbl (path_col varchar unique, hash_col varchar)")
 
+#is_scanning_now = False
 
 def is_scanning():
-    global is_scanning_now
-    return is_scanning_now
+#    global is_scanning_now
+#    return is_scanning_now
+    return False
 
 
 def get_duplicates(path):
-    print ("Getting duplicates for " + path)
     duplicates = []
-
-    cursor.execute("select * from files_tbl where hash_col='78ee691dabb5a26686134c34edfb220d'")
+    cursor.execute("select f2.path_col from files_tbl f1, files_tbl f2 where f1.hash_col==f2.hash_col and f1.path_col==f2.path_col and f1.path_col='"+path+"'")
     for y in cursor.fetchall():
-        print(y)
-        print('sssssssssssssssssss')
-#        filehash = y
-#        print('filehash ' + filehash[0])
+        duplicates.append(y)
+    return duplicates
 
-    return
-
-    print('should not see me')
-
-    cursor.execute("select hash_col from files_tbl where path_col='"+path+"'")
-    for y in cursor.fetchall():
-        filehash = y
-        print('filehash ' + filehash[0])
-
-    cursor.execute("select path_col from files_tbl where hash_col='"+filehash[0]+"'")
-    for y in cursor.fetchall():
-        print(y)
-#        duplicates.append[y[0]]
+def get_locations():
+    # todo
+    locations = []
+    #locations.append("\\\\wwl-n13\E")
+    locations.append("D:\\")
+    return locations
 
 
-
-    #cursor.execute("select f2.path_col from files_tbl f1, files_tbl f2 where f1.hash_col==f2.hash_col and f1.path_col==f2.path_col and f1.path_col='"+path+"'")
-    #for y in cursor.fetchall():
-    #    print (y)
-    #    duplicates.append(y)
-
-
-#get_duplicates("D:\\PYTHON_PROJECTS\\copyfinder\\test\\trixer")
-
-cursor.execute("select * from files_tbl")
-for y in cursor.fetchall():
-    print(y)
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 
 def scan():
-    global is_scanning_now
-    is_scanning_now = True
-    time.sleep(10000)
-    is_scanning_now = False
+    #global is_scanning_now
+    #is_scanning_now = True
+    print('Scanning started')
+    counter = 0
+    for location in get_locations():
+        for root, directories, files in walk(location):
+            for file in files:
+                try:
+                    hash = md5(os.path.join(root, file))
+                    print (hash + " " + os.path.join(root, file))
+                    cursor.execute("insert into files_tbl(path_col, hash_col) values ('" + os.path.join(root, file) + "', '" + hash + "')")
+                except :
+                    print ("Error to process " + os.path.join(root, file))
+                counter +=1
+                if (counter%1000==0):
+                    connection.commit()
+                    print ('records stored: '+ str(counter))
+        print (location + "done")
 
+    #is_scanning_now = False
+
+
+class Scanner(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        print('Scanning started')
+        counter = 0
+        for location in get_locations():
+            for root, directories, files in walk(location):
+                for file in files:
+                    try:
+                        hash = md5(os.path.join(root, file))
+                        print (hash + " " + os.path.join(root, file))
+                        cursor.execute("insert into files_tbl(path_col, hash_col) values ('" + os.path.join(root, file) + "', '" + hash + "')")
+                    except :
+                        print ("Error to process " + os.path.join(root, file))
+                    counter +=1
+                    if (counter%1000==0):
+                        connection.commit()
+                        print ('records stored: '+ str(counter))
+            print (location + "done")
