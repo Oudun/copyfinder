@@ -86,3 +86,11 @@ class Scanner(threading.Thread):
                         connection.commit()
                         print ('records stored: '+ str(counter))
             print (location + "done")
+
+
+    def run1(self):
+        #for each directory in location
+        #   if directory access date later than last location scan date
+        #       scan files
+        #   update location scan date
+
