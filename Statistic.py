@@ -4,11 +4,13 @@ from os import walk
 import hashlib
 import os
 import threading
+import datetime
 
 connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
-cursor.execute("drop table if exists files_tbl")
-cursor.execute("create table if not exists files_tbl (path_col varchar unique, hash_col varchar)")
+#cursor.execute("drop table if exists files_tbl")
+cursor.execute("create table if not exists files_tbl (path_col varchar unique, dir_col varchar, hash_col varchar)")
+cursor.execute("create table if not exists locations_tbl (location_col varchar unique, scan_date_col datetime)")
 
 #is_scanning_now = False
 
@@ -20,77 +22,85 @@ def is_scanning():
 
 def get_duplicates(path):
     duplicates = []
-    cursor.execute("select f2.path_col from files_tbl f1, files_tbl f2 where f1.hash_col==f2.hash_col and f1.path_col==f2.path_col and f1.path_col='"+path+"'")
-    for y in cursor.fetchall():
-        duplicates.append(y)
+    # cursor.execute("select f2.path_col from files_tbl f1, files_tbl f2 where f1.hash_col==f2.hash_col and f1.path_col==f2.path_col and f1.path_col='"+path+"'")
+    # for y in cursor.fetchall():
+    #     duplicates.append(y)
     return duplicates
 
 def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    locations.append("D:\\")
+    locations.append("C:\\")
     return locations
 
 
-def md5(fname):
+def is_updated_after_scan(self, root, directory, locationScanDate = None):
+    if locationScanDate is None:
+        return True
+    else:
+        lastAccessTime = os.path.getatime(os.path.join(root, directory))
+        return lastAccessTime > locationScanDate
+
+
+class Storage:
+
+    def get_location_scan_date(self, location):
+        connection = sqlite3.connect('example.db')
+        cursor = connection.cursor()
+        cursor.execute("select scan_date_col from locations_tbl where location_col = '%s'" % location)
+        return cursor.fetchone()
+
+    def cleanup_directory_info(self, directory):
+        connection = sqlite3.connect('example.db')
+        cursor = connection.cursor()
+        cursor.execute("delete from files_tbl where dir_col = '%s'" % directory)
+
+    def store_file_hash(self, root, file, hash):
+        print ("Storing file %s/%s with hash %s" % (root, file, hash))
+        connection = sqlite3.connect('example.db')
+        cursor = connection.cursor()
+        cursor.execute("insert into files_tbl(path_col, dir_col, hash_col) values ('%s', '%s', '%s')" % (os.path.join(root, file), root, hash))
+
+    def update_location_scan_date(self, location):
+        connection = sqlite3.connect('example.db')
+        cursor = connection.cursor()
+        cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
+
+
+def get_hash(root, file):
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
+    with open(os.path.join(root, file), "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-
-def scan():
-    #global is_scanning_now
-    #is_scanning_now = True
-    print('Scanning started')
-    counter = 0
-    for location in get_locations():
-        for root, directories, files in walk(location):
-            for file in files:
-                try:
-                    hash = md5(os.path.join(root, file))
-                    print (hash + " " + os.path.join(root, file))
-                    cursor.execute("insert into files_tbl(path_col, hash_col) values ('" + os.path.join(root, file) + "', '" + hash + "')")
-                except :
-                    print ("Error to process " + os.path.join(root, file))
-                counter +=1
-                if (counter%1000==0):
-                    connection.commit()
-                    print ('records stored: '+ str(counter))
-        print (location + "done")
-
-    #is_scanning_now = False
-
-
 class Scanner(threading.Thread):
+
 
     def __init__(self):
         threading.Thread.__init__(self)
 
     def run(self):
+        storage = Storage()
         print('Scanning started')
-        counter = 0
         for location in get_locations():
+            locationScanDate = storage.get_location_scan_date(location)
             for root, directories, files in walk(location):
-                for file in files:
+                for directory in directories:
                     try:
-                        hash = md5(os.path.join(root, file))
-                        print (hash + " " + os.path.join(root, file))
-                        cursor.execute("insert into files_tbl(path_col, hash_col) values ('" + os.path.join(root, file) + "', '" + hash + "')")
-                    except :
-                        print ("Error to process " + os.path.join(root, file))
-                    counter +=1
-                    if (counter%1000==0):
-                        connection.commit()
-                        print ('records stored: '+ str(counter))
-            print (location + "done")
-
-
-    def run1(self):
-        #for each directory in location
-        #   if directory access date later than last location scan date
-        #       scan files
-        #   update location scan date
-
+                        if is_updated_after_scan(root, directory, locationScanDate):
+                            storage.cleanup_directory_info(root)
+                            for file in files:
+                                try:
+                                    hash = get_hash(root, file)
+                                    storage.store_file_hash(root, file, hash)
+                                except:
+                                    print ("failed to parse %s %s" % (root, file))
+                        else:
+                            print ("No updates")
+                    except:
+                        print("bad directory %s %s" % (root, directory))
+            storage.update_location_scan_date(location)
+                            
+                            

@@ -2,13 +2,9 @@
 
 from Statistic import Scanner
 import tkinter as tk
-import threading
 import os
 from Utils import get_drives
 from Utils import get_parent_path
-#from Statistic import get_duplicates
-from Statistic import is_scanning
-from Statistic import scan
 from tkinter import ttk
 
 
@@ -91,7 +87,7 @@ progress = ttk.Progressbar(window)
 progress.grid(row=3, columnspan=3)
 
 scanButton.bind('<<Button-1>>', start_scanning)
-#currentDirContentListbox.bind('<<ListboxSelect>>', item_selected)
+currentDirContentListbox.bind('<<ListboxSelect>>', item_selected)
 
 drives = get_drives()
 counter = 1
