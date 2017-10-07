@@ -2,14 +2,36 @@ import sqlite3
 import time
 import datetime
 import os
-from os import walk
 
-for root, directories, files in walk("D:\\_CACHE"):
-    for directory in directories:
-        print (os.path.join(root, directory))
-        for file in files:
-            print (os.path.join(root, file))
+    # D:\PROJECTS\copyfinder\test\dir1
+    # D:\PROJECTS\copyfinder\test\dir2
+    # D:\PROJECTS\copyfinder\test\dir3
+    # D:\PROJECTS\copyfinder\test\doppelganger
+    # D:\PROJECTS\copyfinder\test\fixter
+    # D:\PROJECTS\copyfinder\test\trixer
+    # D:\PROJECTS\copyfinder\test\dir1\file1
+    # D:\PROJECTS\copyfinder\test\dir1\subdir1
+    # D:\PROJECTS\copyfinder\test\dir2\file21
+    # D:\PROJECTS\copyfinder\test\dir3\file31
+    # D:\PROJECTS\copyfinder\test\dir3\file32
 
+
+# for root, directories, files in walk("D:\\PROJECTS\\copyfinder\\test"):
+#     for directory in directories:
+#         print (os.path.join(root, directory))
+#         for file in files:
+#             print (os.path.join(root, file))
+
+
+def scan(directory):
+    print ("scanning " + directory)
+    for item in os.listdir(directory):
+        if os.path.isfile(os.path.join(directory, item)):
+            print(os.path.join(directory, item))
+        else:
+            scan(os.path.join(directory, item))
+
+scan ("D:\\PROJECTS\\copyfinder\\test")
 
 
 # connection = sqlite3.connect('example.db')

@@ -31,16 +31,19 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    locations.append("C:\\")
+    locations.append("D:\\PROJECTS\\copyfinder\\test")
     return locations
 
 
 def is_updated_after_scan(self, root, directory, locationScanDate = None):
     if locationScanDate is None:
+        print("No record for location ")
         return True
     else:
         lastAccessTime = os.path.getatime(os.path.join(root, directory))
+        print(lastAccessTime +" > " +  locationScanDate + "=" + (lastAccessTime > locationScanDate))
         return lastAccessTime > locationScanDate
+        #return True
 
 
 class Storage:
@@ -57,15 +60,18 @@ class Storage:
         cursor.execute("delete from files_tbl where dir_col = '%s'" % directory)
 
     def store_file_hash(self, root, file, hash):
-        print ("Storing file %s/%s with hash %s" % (root, file, hash))
         connection = sqlite3.connect('example.db')
         cursor = connection.cursor()
         cursor.execute("insert into files_tbl(path_col, dir_col, hash_col) values ('%s', '%s', '%s')" % (os.path.join(root, file), root, hash))
 
-    def update_location_scan_date(self, location):
+    def update_location_scan_date(self, location, locationScanDate = None):
         connection = sqlite3.connect('example.db')
         cursor = connection.cursor()
-        cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
+        if locationScanDate is None:
+            cursor.execute("insert into locations_tbl values ('%s', '%s')" % (location, datetime.datetime.now()))
+        else:
+            cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
+        print("storing location date " + location)
 
 
 def get_hash(root, file):
@@ -87,20 +93,25 @@ class Scanner(threading.Thread):
         for location in get_locations():
             locationScanDate = storage.get_location_scan_date(location)
             for root, directories, files in walk(location):
-                for directory in directories:
-                    try:
-                        if is_updated_after_scan(root, directory, locationScanDate):
-                            storage.cleanup_directory_info(root)
-                            for file in files:
-                                try:
-                                    hash = get_hash(root, file)
-                                    storage.store_file_hash(root, file, hash)
-                                except:
-                                    print ("failed to parse %s %s" % (root, file))
-                        else:
-                            print ("No updates")
-                    except:
-                        print("bad directory %s %s" % (root, directory))
-            storage.update_location_scan_date(location)
+                try:
+                    for directory in directories:
+                        try:
+                            print("entering %s" % os.path.join(root, directory))
+                            if is_updated_after_scan(root, directory, locationScanDate):
+                                storage.cleanup_directory_info(root)
+                                for file in files:
+                                    print("file %s" % os.path.join(root, file))
+                                    try:
+                                        hash = get_hash(root, file)
+                                        storage.store_file_hash(root, file, hash)
+                                    except:
+                                        print ("failed to parse %s %s" % (root, file))
+                            else:
+                                print ("No updates")
+                        except:
+                            print("bad directory %s %s" % (root, directory))
+                except:
+                    print("something is wrong")
+            storage.update_location_scan_date(location, locationScanDate)
                             
                             
