@@ -31,19 +31,29 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    locations.append("D:\\PROJECTS\\copyfinder\\test")
+    locations.append("D:\\projects")
     return locations
 
-
-def is_updated_after_scan(self, root, directory, locationScanDate = None):
+def is_updated_after_scan(self, fullpath, locationScanDate = None):
+    print("self = " + self)
+    print("is_updated_after_scan(%s, %s, %s)" % (self, fullpath, locationScanDate))
     if locationScanDate is None:
         print("No record for location ")
         return True
     else:
-        lastAccessTime = os.path.getatime(os.path.join(root, directory))
+        lastAccessTime = os.path.getatime(fullpath)
         print(lastAccessTime +" > " +  locationScanDate + "=" + (lastAccessTime > locationScanDate))
         return lastAccessTime > locationScanDate
         #return True
+
+
+def is_updated_after_scan_1(self, root, directory, locationScanDate = None):
+    print("is_updated_after_scan1(%s, %s, %s, %s)" % self, root, directory, locationScanDate)
+    return os.path.getatime(self, os.path.join(root, directory), locationScanDate)
+
+
+
+
 
 
 class Storage:
@@ -68,10 +78,10 @@ class Storage:
         connection = sqlite3.connect('example.db')
         cursor = connection.cursor()
         if locationScanDate is None:
-            cursor.execute("insert into locations_tbl values ('%s', '%s')" % (location, datetime.datetime.now()))
+            cursor.execute("insert into locations_tbl (location_col, scan_date_col) values ('%s', '%s')" % (location, datetime.datetime.now()))
         else:
             cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
-        print("storing location date " + location)
+        print("storing location %s date %s " % (location, datetime.datetime.now()))
 
 
 def get_hash(root, file):
@@ -92,26 +102,26 @@ class Scanner(threading.Thread):
         print('Scanning started')
         for location in get_locations():
             locationScanDate = storage.get_location_scan_date(location)
-            for root, directories, files in walk(location):
-                try:
-                    for directory in directories:
-                        try:
-                            print("entering %s" % os.path.join(root, directory))
-                            if is_updated_after_scan(root, directory, locationScanDate):
-                                storage.cleanup_directory_info(root)
-                                for file in files:
-                                    print("file %s" % os.path.join(root, file))
-                                    try:
-                                        hash = get_hash(root, file)
-                                        storage.store_file_hash(root, file, hash)
-                                    except:
-                                        print ("failed to parse %s %s" % (root, file))
-                            else:
-                                print ("No updates")
-                        except:
-                            print("bad directory %s %s" % (root, directory))
-                except:
-                    print("something is wrong")
+            Scanner.scan(location, locationScanDate, storage)
             storage.update_location_scan_date(location, locationScanDate)
-                            
+
+    def scan(directory, scanDate, storage):
+        print ("scanning " + directory)
+        try:
+            if is_updated_after_scan(directory, scanDate):
+                storage.cleanup_directory_info(directory)
+                for item in os.listdir(directory):
+                    subitem = os.path.join(directory, item)
+                    if (os.path.isdir(subitem)):
+                        Scanner.scan(subitem, scanDate, storage)
+                    else:
+                        hash = get_hash(directory, item)
+                        storage.store_file_hash(directory, subitem, hash);
+            else:
+                for item in os.listdir(directory):
+                    subitem = os.path.join(directory, item)
+                    if (os.path.isdir(subitem)):
+                        Scanner.scan(subitem, scanDate, storage)
+        except PermissionError:
+            print("Permission error reading " + directory)
                             
