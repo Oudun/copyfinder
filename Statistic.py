@@ -31,10 +31,10 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    locations.append("D:\\projects")
+    locations.append("D:\\PROJECTS\\copyfinder\\test\\dir1")
     return locations
 
-def is_updated_after_scan(self, fullpath, locationScanDate = None):
+def is_updated_after_scan(self, fullpath, locationScanDate):
     print("self = " + self)
     print("is_updated_after_scan(%s, %s, %s)" % (self, fullpath, locationScanDate))
     if locationScanDate is None:
@@ -61,8 +61,21 @@ class Storage:
     def get_location_scan_date(self, location):
         connection = sqlite3.connect('example.db')
         cursor = connection.cursor()
+
+        cursor.execute("select * from locations_tbl")
+        for y in cursor.fetchall():
+            print (y)
+
+        print("select scan_date_col from locations_tbl where location_col = '%s'" % location)
         cursor.execute("select scan_date_col from locations_tbl where location_col = '%s'" % location)
-        return cursor.fetchone()
+        for y in cursor.fetchall():
+            print (y)
+
+        cursor.execute("select scan_date_col from locations_tbl where location_col = '%s'" % location)
+        print("cursor.fetchone() = " + cursor.fetchone()[0])
+#        result = cursor.fetchone()[0]
+        result = datetime.datetime.now()
+        return result
 
     def cleanup_directory_info(self, directory):
         connection = sqlite3.connect('example.db')
@@ -78,9 +91,18 @@ class Storage:
         connection = sqlite3.connect('example.db')
         cursor = connection.cursor()
         if locationScanDate is None:
+            print("insert into locations_tbl (location_col, scan_date_col) values ('%s', '%s')" % (location, datetime.datetime.now()))
             cursor.execute("insert into locations_tbl (location_col, scan_date_col) values ('%s', '%s')" % (location, datetime.datetime.now()))
+            cursor.execute("select * from locations_tbl")
+            for y in cursor.fetchall():
+                print (y)
+            connection.commit()
         else:
             cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
+            cursor.execute("select * from locations_tbl")
+            for y in cursor.fetchall():
+                print (y)
+            connection.commit()
         print("storing location %s date %s " % (location, datetime.datetime.now()))
 
 

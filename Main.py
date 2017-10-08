@@ -94,8 +94,6 @@ counter = 1
 for drive in drives:
     currentDirContentListbox.insert(++counter, drive+":\\")
 
-
-
 window.config(width = 640, height = 480)
 window.mainloop()
 
