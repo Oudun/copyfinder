@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+
 from Statistic import Scanner
 import tkinter as tk
 import os

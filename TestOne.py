@@ -3,7 +3,7 @@ import sqlite3
 connection = sqlite3.connect("test.db")
 cursor = connection.cursor()
 cursor.execute("drop table if exists test_tbl")
-cursor.execute("create table test_tbl (id_col varchar, value_col dat)")
+cursor.execute("create table test_tbl (id_col varchar, value_col)")
 
 
 def set_value(name, value):
