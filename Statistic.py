@@ -9,9 +9,19 @@ connection = sqlite3.connect('example.db')
 cursor = connection.cursor()
 cursor.execute("create table if not exists files_tbl (path_col varchar unique, dir_col varchar, hash_col varchar)")
 cursor.execute("create table if not exists locations_tbl (location_col varchar unique, scan_date_col datetime)")
-cursor.close()
+cursor.execute("create view if not exists duplicate_view as select hash_col, count(*) as c from files_tbl group by hash_col order by c")
+cursor.execute("create view if not exists duplicate_path_view as select f.path_col from files_tbl f, duplicate_view d where f.hash_col=d.hash_col and d.c > 1")
+cursor.execute("create table if not exists duplicates_path_tbl as select * from duplicate_path_view")
 
-#is_scanning_now = False
+#cursor.close()
+
+
+def has_duplicates(path):
+    print("select * from duplicates_path_tbl where path_col like '%s%%'" % path)
+    cursor.execute("select * from duplicates_path_tbl where path_col like '%s%%'" % path)
+    result = cursor.fetchone()
+    return result is not None
+
 
 def is_scanning():
 #    global is_scanning_now
@@ -30,8 +40,8 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    #locations.append("D:\\PROJECTS\\copyfinder")
-    locations.append("F:\\Foto")
+    locations.append("D:\\PROJECTS\\copyfinder")
+    #locations.append("F:\\Foto")
     return locations
 
 def is_updated_after_scan(fullpath, locationScanDate = None):
@@ -65,6 +75,7 @@ class Storage:
 
     def cleanup_directory_info(self, directory):
         self.cursor.execute("delete from files_tbl where dir_col = '%s'" % directory)
+
 
     def store_file_hash(self, root, file, hash):
         try:
@@ -108,8 +119,6 @@ class Scanner(threading.Thread):
             storage.update_location_scan_date(location, locationScanDate)
 
     def scan(directory, scanDate, storage):
-        #scanDate = datetime.datetime.now()
-        #print ("Scan Date is %s " % scanDate)
         try:
             if is_updated_after_scan(directory, scanDate):
                 print(directory + " was updated")
