@@ -3,6 +3,7 @@
 
 from Statistic import Scanner
 from Statistic import has_duplicates
+from Statistic import is_scanned
 import tkinter as tk
 import os
 from Utils import get_drives
@@ -44,12 +45,14 @@ def set_current_dir(dir):
     currentDirContentListbox.insert(++counter, "..")
     for item in items:
         currentDirContentListbox.insert(++counter, os.path.join(dir, item))
-        if (has_duplicates(os.path.join(dir, item))):
-            if (os.path.isfile(os.path.join(dir, item))):
-                currentDirContentListbox.itemconfig(counter, {'bg':'red'})
-            else:
-                currentDirContentListbox.itemconfig(counter, {'bg':'pink'})
-
+        if (is_scanned(os.path.join(dir, item))):
+            if (has_duplicates(os.path.join(dir, item))):
+                if (os.path.isfile(os.path.join(dir, item))):
+                    currentDirContentListbox.itemconfig(counter, {'bg':'red'})
+                else:
+                    currentDirContentListbox.itemconfig(counter, {'bg':'pink'})
+        else:
+            currentDirContentListbox.itemconfig(counter, {'fg':'grey'})
 
 def item_selected(event):
     widget = event.widget

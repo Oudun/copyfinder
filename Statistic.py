@@ -23,6 +23,14 @@ def has_duplicates(path):
     return result is not None
 
 
+def is_scanned(path):
+    print("select * from files_tbl where path_col like '%s%%'" % path)
+    cursor.execute("select * from files_tbl where path_col like '%s%%'" % path)
+    result = cursor.fetchone()
+    return result is not None
+
+
+
 def is_scanning():
 #    global is_scanning_now
 #    return is_scanning_now
