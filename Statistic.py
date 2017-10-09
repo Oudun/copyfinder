@@ -31,9 +31,7 @@ def get_locations():
     locations = []
     #locations.append("\\\\wwl-n13\E")
     #locations.append("D:\\PROJECTS\\copyfinder")
-    locations.append("C:\\Documents and Settings\\Denis\\My Documents")
-    locations.append("C:\\Documents and Settings\\Denis\\Downloads")
-    locations.append("C:\\Documents and Settings\\Denis\\Desktop")
+    locations.append("F:\\Foto")
     return locations
 
 def is_updated_after_scan(fullpath, locationScanDate = None):
@@ -85,12 +83,15 @@ class Storage:
         self.connection.commit()
 
 
+# def get_hash(root, file):
+#     hash_md5 = hashlib.md5()
+#     with open(os.path.join(root, file), "rb") as f:
+#         for chunk in iter(lambda: f.read(4096), b""):
+#             hash_md5.update(chunk)
+#     return hash_md5.hexdigest()
+
 def get_hash(root, file):
-    hash_md5 = hashlib.md5()
-    with open(os.path.join(root, file), "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+    return os.path.getsize(os.path.join(root, file))
 
 class Scanner(threading.Thread):
 
@@ -130,5 +131,6 @@ class Scanner(threading.Thread):
                         Scanner.scan(subitem, scanDate, storage)
         except PermissionError:
             print("Permission error reading " + directory)
+        except:
+            print("Error reading " + directory)
 
-                            
