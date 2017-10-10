@@ -44,6 +44,7 @@ def get_duplicates(path):
     #     duplicates.append(y)
     return duplicates
 
+
 def get_locations():
     # todo
     locations = []
@@ -52,17 +53,17 @@ def get_locations():
     #locations.append("F:\\Foto")
     return locations
 
+
 def is_updated_after_scan(fullpath, locationScanDate = None):
     if locationScanDate is None:
         print("No record for location ")
         return True
     else:
-        lastAccessTimestamp = os.path.getatime(fullpath)
-        lastAccessTime = datetime.datetime.fromtimestamp(lastAccessTimestamp)
+        last_access_timestamp = os.path.getatime(fullpath)
+        lastAccessTime = datetime.datetime.fromtimestamp(last_access_timestamp)
         locationScanTime = datetime.datetime.strptime(locationScanDate, '%Y-%m-%d %H:%M:%S.%f')
-        #print("%s > %s = %s" % (lastAccessTime, locationScanTime, (lastAccessTime > locationScanTime)))
         return lastAccessTime > locationScanTime
-        #return True
+
 
 class Storage:
 
@@ -80,10 +81,8 @@ class Storage:
         else:
             return result[0]
 
-
     def cleanup_directory_info(self, directory):
         self.cursor.execute("delete from files_tbl where dir_col = '%s'" % directory)
-
 
     def store_file_hash(self, root, file, hash):
         try:
@@ -92,7 +91,6 @@ class Storage:
             print("Could not insert value for %s" % os.path.join(root, file))
         finally:
             self.connection.commit()
-
 
     def update_location_scan_date(self, location, locationScanDate = None):
         if locationScanDate is None:
@@ -112,8 +110,8 @@ class Storage:
 def get_hash(root, file):
     return os.path.getsize(os.path.join(root, file))
 
-class Scanner(threading.Thread):
 
+class Scanner(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
