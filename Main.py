@@ -48,7 +48,7 @@ def set_current_dir(dir):
         if (is_scanned(os.path.join(dir, item))):
             if (has_duplicates(os.path.join(dir, item))):
                 if (os.path.isfile(os.path.join(dir, item))):
-                    currentDirContentListbox.itemconfig(counter, {'bg':'red'})
+                    currentDirContentListbox.itemconfig(counter, {'bg':'red','padx':100})
                 else:
                     currentDirContentListbox.itemconfig(counter, {'bg':'pink'})
         else:
