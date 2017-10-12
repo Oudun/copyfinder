@@ -49,7 +49,8 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    locations.append("D:\\PROJECTS\\copyfinder")
+    locations.append("E:\\")
+    locations.append("F:\\Foto")
     #locations.append("F:\\Foto")
     return locations
 

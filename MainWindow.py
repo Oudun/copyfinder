@@ -87,7 +87,7 @@ scanImage=PhotoImage(file="icons/button_search.png").subsample(2, 2)
 exportImage=PhotoImage(file="icons/button_export.png").subsample(2, 2)
 importImage=PhotoImage(file="icons/button_import.png").subsample(2, 2)
 
-buttonScan = Button(buttonPanel, compound=TOP, text='Scan', image=scanImage, relief=FLAT, width=72, bg='white')
+buttonScan = Button(buttonPanel, compound=TOP, text='Scan', image=scanImage, relief=FLAT, width=72, bg='white', command=start_scanning())
 buttonExport = Button(buttonPanel, compound=TOP, text='Export', image=exportImage, relief=FLAT, width=72, bg='white')
 buttonImport = Button(buttonPanel, compound=TOP, text='Import', image=importImage, relief=FLAT, width=72, bg='white')
 stub =  Label(buttonPanel, bg='white')
