@@ -1,9 +1,16 @@
 from tkinter import *
 from Statistic import *
 from Utils import *
+from ModalDialog import *
+
+
+window = Tk()
 
 
 def start_scanning():
+    if len(get_locations()) == 0:
+        w = ModalDialog(window)
+        w.grab_set()
     scanner = Scanner()
     try:
         scanner.start()
@@ -32,6 +39,7 @@ def set_current_dir(dir):
         counter = 1
         contentListbox.delete(0,contentListbox.size()-1)
         contentListbox.insert(++counter, "..")
+        contentListbox.itemconfig(1, {})
         for item in items:
             contentListbox.insert(++counter, os.path.join(dir, item))
             # if (is_scanned(os.path.join(dir, item))):
@@ -69,11 +77,11 @@ def reset():
         contentListbox.insert(++counter, drive+":\\")
 
 
-
-window = Tk()
 window.title(string='Dolly')
 window.iconbitmap('icons/dolly_icon.ico')
-window.geometry('800x600')
+print(window.winfo_screenwidth())
+print(window.winfo_screenheight())
+window.geometry('800x600+%d+%d' % ((window.winfo_screenwidth()-800)/2, (window.winfo_screenheight()-600)/2))
 
 mainPanel = PanedWindow(orient=VERTICAL)
 mainPanel.pack(fill=BOTH, expand=1)
@@ -87,10 +95,11 @@ scanImage=PhotoImage(file="icons/button_search.png").subsample(2, 2)
 exportImage=PhotoImage(file="icons/button_export.png").subsample(2, 2)
 importImage=PhotoImage(file="icons/button_import.png").subsample(2, 2)
 
-buttonScan = Button(buttonPanel, compound=TOP, text='Scan', image=scanImage, relief=FLAT, width=72, bg='white', command=start_scanning())
+buttonScan = Button(buttonPanel, compound=TOP, text='Scan', image=scanImage, relief=FLAT, width=72, bg='white', command=start_scanning)
 buttonExport = Button(buttonPanel, compound=TOP, text='Export', image=exportImage, relief=FLAT, width=72, bg='white')
 buttonImport = Button(buttonPanel, compound=TOP, text='Import', image=importImage, relief=FLAT, width=72, bg='white')
 stub =  Label(buttonPanel, bg='white')
+
 
 buttonPanel.add(buttonScan)
 buttonPanel.add(buttonExport)
