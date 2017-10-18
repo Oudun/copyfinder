@@ -9,8 +9,7 @@ window = Tk()
 
 def start_scanning():
     if len(get_locations()) == 0:
-        w = ModalDialog(window)
-        w.grab_set()
+        w = ModalDialog(window, 'Nothing to scan', 'No location were set for scanning', 320, 240)
     scanner = Scanner()
     try:
         scanner.start()
@@ -39,17 +38,14 @@ def set_current_dir(dir):
         counter = 1
         contentListbox.delete(0,contentListbox.size()-1)
         contentListbox.insert(++counter, "..")
-        contentListbox.itemconfig(1, {})
+        #contentListbox.itemconfig(1, {})
         for item in items:
             contentListbox.insert(++counter, os.path.join(dir, item))
-            # if (is_scanned(os.path.join(dir, item))):
-            if (has_duplicates(os.path.join(dir, item))):
-                if (os.path.isfile(os.path.join(dir, item))):
-                    contentListbox.itemconfig(counter, {'bg':'red','padx':10})
+            if has_duplicates(os.path.join(dir, item)):
+                if os.path.isfile(os.path.join(dir, item)):
+                    contentListbox.itemconfig(counter, {'bg': 'red', 'padx': 10})
                 else:
-                    contentListbox.itemconfig(counter, {'bg':'pink'})
-            # else:
-            #     contentListbox.itemconfig(counter, {'fg':'grey'})
+                    contentListbox.itemconfig(counter, {'bg': 'pink'})
     except PermissionError:
         print ("could not access")
 

@@ -49,7 +49,7 @@ def get_locations():
     # todo
     locations = []
     #locations.append("\\\\wwl-n13\E")
-    #locations.append("E:\\")
+    locations.append("D:\\")
     #locations.append("F:\\Foto")
     #locations.append("F:\\Foto")
     return locations
