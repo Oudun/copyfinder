@@ -11,7 +11,7 @@ class Storage:
     def __init__(self, location = None):
         if location is None:
             location = 'example.db'
-        self.connection = sqlite3.connect(location)
+        self.connection = sqlite3.connect(location, detect_types=sqlite3.PARSE_DECLTYPES)
         self.cursor = self.connection.cursor()
         self.cursor.execute("create table if not exists files_tbl (path_col varchar unique, dir_col varchar, hash_col varchar)")
         self.cursor.execute("create table if not exists locations_tbl (location_col varchar unique, scan_date_col datetime)")
@@ -30,11 +30,6 @@ class Storage:
 
 
     def is_scanned(self, path):
-        self.cursor.execute("select * from files_tbl")
-        result = self.cursor.fetchone()
-        for y in result:
-            print(y)
-        print("select * from files_tbl where path_col like '%s%%'" % path)
         self.cursor.execute("select * from files_tbl where path_col like '%s%%'" % path)
         result = self.cursor.fetchone()
         return result is not None
@@ -65,5 +60,5 @@ class Storage:
         if location_scan_date is None:
             self.cursor.execute("insert into locations_tbl (location_col, scan_date_col) values ('%s', '%s')" % (location, datetime.datetime.now()))
         else:
-            self.cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (datetime.datetime.now(), location))
+            self.cursor.execute("update locations_tbl set scan_date_col = '%s' where location_col = '%s'" % (location_scan_date, location))
         self.connection.commit()
